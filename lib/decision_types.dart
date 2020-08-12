@@ -1,0 +1,1 @@
+enum decisionType { FEATURE, EXPERIMENT }
