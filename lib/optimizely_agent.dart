@@ -126,19 +126,3 @@ class OptimizelyAgent {
     return Tuple2(resp.statusCode, null);
   }
 }
-
-void main() async {
-  OptimizelyAgent agent =
-      OptimizelyAgent("VJ4GPwsRoNa95NN6VpS2hC", "http://127.0.0.1:8080");
-  // var config = await agent.overrideDecision(
-  //     userId: "abcd",
-  //     experimentKey: "feat100_500_features_test_test",
-  //     variationKey: "variation_2");
-  var config = await agent.getOptimizelyConfig();
-  // var config = await agent.track(eventKey: "myevent");
-  // var config = await agent.activate(
-  //     userId: "abcd1",
-  //     type: decisionType.experiment,
-  //     experimentKey: ["feat100_500_features_test_test"]);
-  print(config.item1);
-}
