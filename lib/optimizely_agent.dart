@@ -40,6 +40,7 @@ class OptimizelyAgent {
     _manager = RequestManager(sdkKey, url);
   }
 
+  /// Returns status code and OptimizelyConfig object
   Future<Tuple2<int, OptimizelyConfig>> getOptimizelyConfig() async {
     Response resp = await _manager.getOptimizelyConfig();
 
@@ -50,6 +51,7 @@ class OptimizelyAgent {
     return Tuple2(resp.statusCode, null);
   }
 
+  /// Tracks an event and returns status code and TrackResponse object.
   Future<Tuple2<int, TrackResponse>> track(
       {@required String eventKey,
       String userId,
@@ -67,6 +69,7 @@ class OptimizelyAgent {
     return Tuple2(resp.statusCode, null);
   }
 
+  /// Overrides a decision for the user and returns status code and OverrideResponse object.
   Future<Tuple2<int, OverrideResponse>> overrideDecision(
       {@required String userId,
       @required String experimentKey,
@@ -83,6 +86,8 @@ class OptimizelyAgent {
     return Tuple2(resp.statusCode, null);
   }
 
+  /// Activate makes feature and experiment decisions for the selected query parameters
+  /// and returns status code and ActivateResponse object.
   Future<Tuple2<int, List<ActivateResponse>>> activate(
       {@required String userId,
       Map<String, dynamic> userAttributes,
@@ -110,6 +115,8 @@ class OptimizelyAgent {
     return Tuple2(resp.statusCode, null);
   }
 
+  /// Generates a JWT access token for the API service
+  /// and returns status code and TokenResponse object.
   Future<Tuple2<int, TokenResponse>> jwtToken(
       {@required String grantType,
       @required String clientId,
