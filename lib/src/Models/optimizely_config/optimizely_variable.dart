@@ -14,30 +14,33 @@
  * limitations under the License.                                           *
  ***************************************************************************/
 
-import 'dart:io';
+class OptimizelyVariable {
+  String id;
+  String key;
+  String type;
+  String value;
 
-import 'package:dio/dio.dart';
+  OptimizelyVariable(this.id, this.key, this.type, this.value);
 
-class HttpManager {
-  final String _sdkKey;
-  final String _url;
-  final _client = Dio();
+  factory OptimizelyVariable.fromJson(Map<String, dynamic> json) =>
+      _$OptimizelyVariableFromJson(json);
 
-  HttpManager(this._sdkKey, this._url) {
-    _client.options.baseUrl = _url;
-    _client.options.headers = {
-      "X-Optimizely-SDK-Key": _sdkKey,
-      HttpHeaders.contentTypeHeader: "application/json"
-    };
-  }
-
-  Future<Response> getRequest(String endpoint) async {
-    return await _client.get('$_url$endpoint');
-  }
-
-  Future<Response> postRequest(String endpoint, Object body,
-      [Map<String, String> queryParams]) async {
-    return await _client.post(endpoint,
-        data: body, queryParameters: queryParams);
-  }
+  Map<String, dynamic> toJson() => _$OptimizelyVariableToJson(this);
 }
+
+OptimizelyVariable _$OptimizelyVariableFromJson(Map<String, dynamic> json) {
+  return OptimizelyVariable(
+    json['id'] as String,
+    json['key'] as String,
+    json['type'] as String,
+    json['value'] as String,
+  );
+}
+
+Map<String, dynamic> _$OptimizelyVariableToJson(OptimizelyVariable instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'key': instance.key,
+      'type': instance.type,
+      'value': instance.value,
+    };

@@ -14,9 +14,30 @@
  * limitations under the License.                                           *
  ***************************************************************************/
 
-class Response<T> {
-  final int statusCode;
-  final T response;
+class TrackResponse {
+  TrackResponse(this.userId, this.eventKey, this.error);
 
-  const Response(this.statusCode, this.response);
+  String userId;
+  String eventKey;
+  String error;
+
+  factory TrackResponse.fromJson(Map<String, dynamic> json) =>
+      _$TrackResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$TrackResponseToJson(this);
 }
+
+TrackResponse _$TrackResponseFromJson(Map<String, dynamic> json) {
+  return TrackResponse(
+    json['userId'] as String,
+    json['eventKey'] as String,
+    json['error'] as String ?? '',
+  );
+}
+
+Map<String, dynamic> _$TrackResponseToJson(TrackResponse instance) =>
+    <String, dynamic>{
+      'userId': instance.userId,
+      'eventKey': instance.eventKey,
+      'error': instance.error,
+    };

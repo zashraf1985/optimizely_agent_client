@@ -14,30 +14,37 @@
  * limitations under the License.                                           *
  ***************************************************************************/
 
-import 'dart:io';
+class OverrideResponse {
+  OverrideResponse(this.userId, this.experimentKey, this.variationKey,
+      this.prevVariationKey, this.messages);
 
-import 'package:dio/dio.dart';
+  String userId;
+  String experimentKey;
+  String variationKey;
+  String prevVariationKey;
+  List<String> messages;
 
-class HttpManager {
-  final String _sdkKey;
-  final String _url;
-  final _client = Dio();
+  factory OverrideResponse.fromJson(Map<String, dynamic> json) =>
+      _$OverrideResponseFromJson(json);
 
-  HttpManager(this._sdkKey, this._url) {
-    _client.options.baseUrl = _url;
-    _client.options.headers = {
-      "X-Optimizely-SDK-Key": _sdkKey,
-      HttpHeaders.contentTypeHeader: "application/json"
-    };
-  }
-
-  Future<Response> getRequest(String endpoint) async {
-    return await _client.get('$_url$endpoint');
-  }
-
-  Future<Response> postRequest(String endpoint, Object body,
-      [Map<String, String> queryParams]) async {
-    return await _client.post(endpoint,
-        data: body, queryParameters: queryParams);
-  }
+  Map<String, dynamic> toJson() => _$OverrideResponseToJson(this);
 }
+
+OverrideResponse _$OverrideResponseFromJson(Map<String, dynamic> json) {
+  return OverrideResponse(
+    json['userId'] as String,
+    json['experimentKey'] as String,
+    json['variationKey'] as String,
+    json['prevVariationKey'] as String,
+    (json['messages'] as List)?.map((e) => e as String)?.toList(),
+  );
+}
+
+Map<String, dynamic> _$OverrideResponseToJson(OverrideResponse instance) =>
+    <String, dynamic>{
+      'userId': instance.userId,
+      'experimentKey': instance.experimentKey,
+      'variationKey': instance.variationKey,
+      'prevVariationKey': instance.prevVariationKey,
+      'messages': instance.messages,
+    };

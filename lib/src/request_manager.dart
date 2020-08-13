@@ -16,25 +16,22 @@
 
 import 'package:meta/meta.dart';
 import 'package:dio/dio.dart';
-import 'package:optimizely_agent_client/src/Interfaces/optimizely_manager.dart';
 import 'package:optimizely_agent_client/src/Models/decision_types.dart';
 import 'package:optimizely_agent_client/src/Network/http_manager.dart';
 
-class DefaultOptimizelyManager extends OptimizelyManager {
+class RequestManager {
   HttpManager _manager;
 
-  DefaultOptimizelyManager(String sdkKey, url) {
+  RequestManager(String sdkKey, url) {
     _manager = HttpManager(sdkKey, url);
   }
 
-  @override
   Future<Response> getOptimizelyConfig() async {
     Response resp;
     await _manager.getRequest("/v1/config").then((value) => resp = value);
     return resp;
   }
 
-  @override
   Future<Response> track(
       {@required String eventKey,
       String userId,
@@ -57,7 +54,6 @@ class DefaultOptimizelyManager extends OptimizelyManager {
     return resp;
   }
 
-  @override
   Future<Response> overrideDecision(
       {@required String userId,
       @required String experimentKey,
@@ -74,7 +70,6 @@ class DefaultOptimizelyManager extends OptimizelyManager {
     return resp;
   }
 
-  @override
   Future<Response> activate({
     @required String userId,
     Map<String, dynamic> userAttributes,
@@ -112,7 +107,6 @@ class DefaultOptimizelyManager extends OptimizelyManager {
     return resp;
   }
 
-  @override
   Future<Response> jwtToken(
       {@required String grantType,
       @required String clientId,

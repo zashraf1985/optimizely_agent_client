@@ -14,30 +14,32 @@
  * limitations under the License.                                           *
  ***************************************************************************/
 
-import 'dart:io';
+class TokenResponse {
+  TokenResponse(this.accessToken, this.tokenType, this.expiresIn);
 
-import 'package:dio/dio.dart';
+  String accessToken;
+  String tokenType;
+  int expiresIn;
+  String error;
 
-class HttpManager {
-  final String _sdkKey;
-  final String _url;
-  final _client = Dio();
+  factory TokenResponse.fromJson(Map<String, dynamic> json) =>
+      _$TokenResponseFromJson(json);
 
-  HttpManager(this._sdkKey, this._url) {
-    _client.options.baseUrl = _url;
-    _client.options.headers = {
-      "X-Optimizely-SDK-Key": _sdkKey,
-      HttpHeaders.contentTypeHeader: "application/json"
-    };
-  }
-
-  Future<Response> getRequest(String endpoint) async {
-    return await _client.get('$_url$endpoint');
-  }
-
-  Future<Response> postRequest(String endpoint, Object body,
-      [Map<String, String> queryParams]) async {
-    return await _client.post(endpoint,
-        data: body, queryParameters: queryParams);
-  }
+  Map<String, dynamic> toJson() => _$TokenResponseToJson(this);
 }
+
+TokenResponse _$TokenResponseFromJson(Map<String, dynamic> json) {
+  return TokenResponse(
+    json['access_token'] as String,
+    json['token_type'] as String,
+    json['expires_in'] as int,
+  )..error = json['error'] as String ?? '';
+}
+
+Map<String, dynamic> _$TokenResponseToJson(TokenResponse instance) =>
+    <String, dynamic>{
+      'access_token': instance.accessToken,
+      'token_type': instance.tokenType,
+      'expires_in': instance.expiresIn,
+      'error': instance.error,
+    };

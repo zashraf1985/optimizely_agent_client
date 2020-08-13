@@ -14,37 +14,41 @@
  * limitations under the License.                                           *
  ***************************************************************************/
 
-import 'package:meta/meta.dart';
-import 'package:dio/dio.dart';
-import 'package:optimizely_agent_client/src/Models/decision_types.dart';
+import 'package:optimizely_agent_client/src/Models/optimizely_config/optimizely_variation.dart';
 
-abstract class OptimizelyManager {
-  Future<Response> getOptimizelyConfig();
+export 'package:optimizely_agent_client/src/Models/optimizely_config/optimizely_variation.dart';
 
-  Future<Response> track(
-      {@required String eventKey,
-      String userId,
-      Map<String, dynamic> eventTags,
-      Map<String, dynamic> userAttributes});
+class OptimizelyExperiment {
+  String id;
+  String key;
+  Map<String, OptimizelyVariation> variationsMap;
 
-  Future<Response> overrideDecision(
-      {@required String userId,
-      @required String experimentKey,
-      @required String variationKey});
+  OptimizelyExperiment(this.id, this.key, this.variationsMap);
 
-  Future<Response> activate({
-    @required String userId,
-    Map<String, dynamic> userAttributes,
-    List<String> featureKey,
-    List<String> experimentKey,
-    bool disableTracking,
-    decisionType type,
-    bool enabled,
-  });
+  factory OptimizelyExperiment.fromJson(Map<String, dynamic> json) =>
+      _$OptimizelyExperimentFromJson(json);
 
-  Future<Response> jwtToken({
-    @required String grantType,
-    @required String clientId,
-    @required String clientSecret,
-  });
+  Map<String, dynamic> toJson() => _$OptimizelyExperimentToJson(this);
 }
+
+OptimizelyExperiment _$OptimizelyExperimentFromJson(Map<String, dynamic> json) {
+  return OptimizelyExperiment(
+    json['id'] as String,
+    json['key'] as String,
+    (json['variationsMap'] as Map<String, dynamic>)?.map(
+      (k, e) => MapEntry(
+          k,
+          e == null
+              ? null
+              : OptimizelyVariation.fromJson(e as Map<String, dynamic>)),
+    ),
+  );
+}
+
+Map<String, dynamic> _$OptimizelyExperimentToJson(
+        OptimizelyExperiment instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'key': instance.key,
+      'variationsMap': instance.variationsMap,
+    };
