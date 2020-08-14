@@ -15,121 +15,95 @@
  ***************************************************************************/
 
 import 'package:meta/meta.dart';
-import 'package:optimizely_agent_client/src/Models/activate_response.dart';
-import 'package:optimizely_agent_client/src/Models/decision_types.dart';
-
 import 'package:dio/dio.dart';
-import 'package:optimizely_agent_client/src/Models/optimizely_config/optimizely_config.dart';
-import 'package:optimizely_agent_client/src/Models/override_response.dart';
-import 'package:optimizely_agent_client/src/Models/token_response.dart';
-import 'package:optimizely_agent_client/src/Models/track_response.dart';
-import 'package:optimizely_agent_client/src/request_manager.dart';
-import 'package:tuple/tuple.dart';
 
-export 'package:optimizely_agent_client/src/Models/decision_types.dart';
-export 'package:optimizely_agent_client/src/Models/optimizely_config/optimizely_config.dart';
-export 'package:optimizely_agent_client/src/Models/activate_response.dart';
-export 'package:optimizely_agent_client/src/Models/override_response.dart';
-export 'package:optimizely_agent_client/src/Models/token_response.dart';
-export 'package:optimizely_agent_client/src/Models/track_response.dart';
+import './src/models/activate_response.dart';
+import './src/models/decision_types.dart';
+
+import './src/models/optimizely_config/optimizely_config.dart';
+import './src/models/override_response.dart';
+import './src/request_manager.dart';
+
+export './src/models/decision_types.dart';
+export './src/models/activate_response.dart';
+export './src/models/override_response.dart';
+
+// Exporting all OptimizelyConfig entities
+export './src/models/optimizely_config/optimizely_config.dart';
+export './src/models/optimizely_config/optimizely_experiment.dart';
+export './src/models/optimizely_config/optimizely_feature.dart';
+export './src/models/optimizely_config/optimizely_variable.dart';
+export './src/models/optimizely_config/optimizely_variation.dart';
 
 class OptimizelyAgent {
-  RequestManager _manager;
+  RequestManager _requestmanager;
 
   OptimizelyAgent(String sdkKey, String url) {
-    _manager = RequestManager(sdkKey, url);
+    _requestmanager = RequestManager(sdkKey, url);
   }
 
   /// Returns status code and OptimizelyConfig object
-  Future<Tuple2<int, OptimizelyConfig>> getOptimizelyConfig() async {
-    Response resp = await _manager.getOptimizelyConfig();
-
-    if (resp.statusCode == 200) {
-      var optConfig = OptimizelyConfig.fromJson(resp.data);
-      return Tuple2(resp.statusCode, optConfig);
-    }
-    return Tuple2(resp.statusCode, null);
+  Future<OptimizelyConfig> getOptimizelyConfig() async {
+    Response resp = await _requestmanager.getOptimizelyConfig();
+    return resp.statusCode == 200 ? OptimizelyConfig.fromJson(resp.data) : null;
   }
 
-  /// Tracks an event and returns status code and TrackResponse object.
-  Future<Tuple2<int, TrackResponse>> track(
-      {@required String eventKey,
-      String userId,
-      Map<String, dynamic> eventTags,
-      Map<String, dynamic> userAttributes}) async {
-    Response resp = await _manager.track(
-        eventKey: eventKey,
-        userId: userId,
-        eventTags: eventTags,
-        userAttributes: userAttributes);
-    if (resp.statusCode == 200) {
-      var trackResponse = TrackResponse.fromJson(resp.data);
-      return Tuple2(resp.statusCode, trackResponse);
-    }
-    return Tuple2(resp.statusCode, null);
+  /// Tracks an event and returns nothing.
+  Future<void> track({
+    @required String eventKey,
+    String userId,
+    Map<String, dynamic> eventTags,
+    Map<String, dynamic> userAttributes
+  }) {
+    return _requestmanager.track(
+      eventKey: eventKey,
+      userId: userId,
+      eventTags: eventTags,
+      userAttributes: userAttributes
+    );    
   }
 
-  /// Overrides a decision for the user and returns status code and OverrideResponse object.
-  Future<Tuple2<int, OverrideResponse>> overrideDecision(
-      {@required String userId,
-      @required String experimentKey,
-      @required String variationKey}) async {
-    Response resp = await _manager.overrideDecision(
-        userId: userId,
-        experimentKey: experimentKey,
-        variationKey: variationKey);
-
-    if (resp.statusCode == 200) {
-      var overrideResponse = OverrideResponse.fromJson(resp.data);
-      return Tuple2(resp.statusCode, overrideResponse);
-    }
-    return Tuple2(resp.statusCode, null);
+  /// Overrides a decision for the user and returns OverrideResponse object.
+  Future<OverrideResponse> overrideDecision({
+    @required String userId,
+    @required String experimentKey,
+    @required String variationKey
+  }) async {
+    Response resp = await _requestmanager.overrideDecision(
+      userId: userId,
+      experimentKey: experimentKey,
+      variationKey: variationKey
+    );
+    return resp.statusCode == 200 ? OverrideResponse.fromJson(resp.data) : null;
   }
 
   /// Activate makes feature and experiment decisions for the selected query parameters
-  /// and returns status code and ActivateResponse object.
-  Future<Tuple2<int, List<ActivateResponse>>> activate(
-      {@required String userId,
-      Map<String, dynamic> userAttributes,
-      List<String> featureKey,
-      List<String> experimentKey,
-      bool disableTracking,
-      decisionType type,
-      bool enabled}) async {
-    Response resp = await _manager.activate(
-        userId: userId,
-        userAttributes: userAttributes,
-        featureKey: featureKey,
-        experimentKey: experimentKey,
-        disableTracking: disableTracking,
-        type: type,
-        enabled: enabled);
-    if (resp.statusCode == 200) {
-      List<dynamic> decisions = resp.data;
-      List<ActivateResponse> convertedDecisions = [];
-      decisions.forEach((element) {
-        convertedDecisions.add(ActivateResponse.fromJson(element));
-      });
-      return Tuple2(resp.statusCode, convertedDecisions);
-    }
-    return Tuple2(resp.statusCode, null);
-  }
-
-  /// Generates a JWT access token for the API service
-  /// and returns status code and TokenResponse object.
-  Future<Tuple2<int, TokenResponse>> jwtToken(
-      {@required String grantType,
-      @required String clientId,
-      @required String clientSecret}) async {
-    Response resp = await _manager.jwtToken(
-      grantType: grantType,
-      clientId: clientId,
-      clientSecret: clientSecret,
+  /// and returns list of OptimizelyDecision
+  Future<List<OptimizelyDecision>> activate({
+    @required String userId,
+    Map<String, dynamic> userAttributes,
+    List<String> featureKey,
+    List<String> experimentKey,
+    bool disableTracking,
+    DecisionType type,
+    bool enabled
+  }) async {
+    Response resp = await _requestmanager.activate(
+      userId: userId,
+      userAttributes: userAttributes,
+      featureKey: featureKey,
+      experimentKey: experimentKey,
+      disableTracking: disableTracking,
+      type: type,
+      enabled: enabled
     );
     if (resp.statusCode == 200) {
-      var overrideResponse = TokenResponse.fromJson(resp.data);
-      return Tuple2(resp.statusCode, overrideResponse);
+      List<OptimizelyDecision> optimizelyDecisions = [];
+      resp.data.forEach((element) {
+        optimizelyDecisions.add(OptimizelyDecision.fromJson(element));
+      });
+      return optimizelyDecisions;
     }
-    return Tuple2(resp.statusCode, null);
+    return null;
   }
 }

@@ -14,30 +14,43 @@
  * limitations under the License.                                           *
  ***************************************************************************/
 
-import 'dart:io';
+import './optimizely_variable.dart';
 
-import 'package:dio/dio.dart';
+class OptimizelyVariation {
+  String id;
+  String key;
+  bool featureEnabled;
+  Map<String, OptimizelyVariable> variablesMap;
 
-class HttpManager {
-  final String _sdkKey;
-  final String _url;
-  final _client = Dio();
+  OptimizelyVariation(
+      this.id, this.key, this.featureEnabled, this.variablesMap);
 
-  HttpManager(this._sdkKey, this._url) {
-    _client.options.baseUrl = _url;
-    _client.options.headers = {
-      "X-Optimizely-SDK-Key": _sdkKey,
-      HttpHeaders.contentTypeHeader: "application/json"
-    };
-  }
+  factory OptimizelyVariation.fromJson(Map<String, dynamic> json) =>
+      _$OptimizelyVariationFromJson(json);
 
-  Future<Response> getRequest(String endpoint) async {
-    return await _client.get('$_url$endpoint');
-  }
-
-  Future<Response> postRequest(String endpoint, Object body,
-      [Map<String, String> queryParams]) async {
-    return await _client.post(endpoint,
-        data: body, queryParameters: queryParams);
-  }
+  Map<String, dynamic> toJson() => _$OptimizelyVariationToJson(this);
 }
+
+OptimizelyVariation _$OptimizelyVariationFromJson(Map<String, dynamic> json) {
+  return OptimizelyVariation(
+    json['id'] as String,
+    json['key'] as String,
+    json['featureEnabled'] as bool,
+    (json['variablesMap'] as Map<String, dynamic>)?.map(
+      (k, e) => MapEntry(
+          k,
+          e == null
+              ? null
+              : OptimizelyVariable.fromJson(e as Map<String, dynamic>)),
+    ),
+  );
+}
+
+Map<String, dynamic> _$OptimizelyVariationToJson(
+        OptimizelyVariation instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'key': instance.key,
+      'featureEnabled': instance.featureEnabled,
+      'variablesMap': instance.variablesMap,
+    };

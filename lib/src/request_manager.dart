@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and      *
  * limitations under the License.                                           *
  ***************************************************************************/
-
+ 
 import 'package:meta/meta.dart';
 import 'package:dio/dio.dart';
-import 'package:optimizely_agent_client/src/Models/decision_types.dart';
-import 'package:optimizely_agent_client/src/Network/http_manager.dart';
+
+import './models/decision_types.dart';
+import './network/http_manager.dart';
 
 class RequestManager {
   HttpManager _manager;
@@ -28,45 +29,61 @@ class RequestManager {
 
   Future<Response> getOptimizelyConfig() async {
     Response resp;
-    await _manager.getRequest("/v1/config").then((value) => resp = value);
+    try {
+      resp = await _manager.getRequest("/v1/config");
+    } on DioError catch(err) {
+      resp = err.response != null ? err.response : new Response(statusCode: 0, statusMessage: err.message);      
+    }
     return resp;
   }
 
-  Future<Response> track(
-      {@required String eventKey,
-      String userId,
-      Map<String, dynamic> eventTags,
-      Map<String, dynamic> userAttributes}) async {
+  Future<Response> track({
+    @required String eventKey,
+    String userId,
+    Map<String, dynamic> eventTags,
+    Map<String, dynamic> userAttributes
+  }) async {
     Map<String, dynamic> body = {};
+
     if (userId != null) {
       body["userId"] = userId;
     }
+
     if (eventTags != null) {
       body["eventTags"] = eventTags;
     }
+
     if (userAttributes != null) {
       body["userAttributes"] = userAttributes;
     }
 
     Response resp;
-    await _manager.postRequest("/v1/track", body, {"eventKey": eventKey}).then(
-        (value) => resp = value);
+    try {
+      resp = await _manager.postRequest("/v1/track", body, {"eventKey": eventKey});
+    } on DioError catch(err) {
+      resp = err.response != null ? err.response : new Response(statusCode: 0, statusMessage: err.message);
+    }
     return resp;
   }
 
-  Future<Response> overrideDecision(
-      {@required String userId,
-      @required String experimentKey,
-      @required String variationKey}) async {
+  Future<Response> overrideDecision({
+    @required String userId,
+    @required String experimentKey,
+    @required String variationKey
+  }) async {    
     Map<String, dynamic> body = {
       "userId": userId,
       "experimentKey": experimentKey,
       "variationKey": variationKey
     };
+    
     Response resp;
-    await _manager
-        .postRequest("/v1/override", body)
-        .then((value) => resp = value);
+    try {
+      resp = await _manager.postRequest("/v1/override", body);
+    } on DioError catch(err) {
+      print(err.message);
+      resp = err.response != null ? err.response : new Response(statusCode: 0, statusMessage: err.message);
+    }
     return resp;
   }
 
@@ -76,50 +93,43 @@ class RequestManager {
     List<String> featureKey,
     List<String> experimentKey,
     bool disableTracking,
-    decisionType type,
+    DecisionType type,
     bool enabled,
   }) async {
-    Map<String, dynamic> body = {"userId": userId};
+    Map<String, dynamic> body = { "userId": userId };
+    
     if (userAttributes != null) {
       body["userAttributes"] = userAttributes;
     }
 
     Map<String, String> queryParams = {};
+    
     if (featureKey != null) {
       queryParams["featureKey"] = featureKey.join(',');
     }
+    
     if (experimentKey != null) {
       queryParams["experimentKey"] = experimentKey.join(',');
     }
+    
     if (disableTracking != null) {
       queryParams["disableTracking"] = disableTracking.toString();
     }
+    
     if (type != null) {
       queryParams["type"] = type.toString().split('.').last;
     }
+    
     if (enabled != null) {
       queryParams["enabled"] = enabled.toString();
     }
+    
     Response resp;
-    await _manager
-        .postRequest("/v1/activate", body, queryParams)
-        .then((value) => resp = value);
-    return resp;
-  }
-
-  Future<Response> jwtToken(
-      {@required String grantType,
-      @required String clientId,
-      @required String clientSecret}) async {
-    Map<String, dynamic> body = {
-      "grant_type": grantType,
-      "client_id": clientId,
-      "client_secret": clientSecret
-    };
-    Response resp;
-    await _manager
-        .postRequest("/oauth/token", body)
-        .then((value) => resp = value);
+    try {
+      resp = await _manager.postRequest("/v1/activate", body, queryParams);
+    } on DioError catch(err) {
+      resp = err.response != null ? err.response : new Response(statusCode: 0, statusMessage: err.message);
+    }
     return resp;
   }
 }

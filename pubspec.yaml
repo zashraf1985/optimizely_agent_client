@@ -5,11 +5,10 @@ description: Optimizely Agent Client.
 # pub.dev using `pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.0+1
+version: 0.1.0
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
   dio: ^3.0.10
-  tuple: ^1.0.3
