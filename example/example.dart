@@ -18,7 +18,7 @@ void main() async {
   }
   print('');
 
-  print('---- Calling Active API ----');
+  print('---- Calling Activate API ----');
   List<OptimizelyDecision> optimizelyDecisions = await agent.activate(userId: 'user1', type: DecisionType.experiment, enabled: true);
   if (optimizelyDecisions != null) {
     print('Total Decisions ${optimizelyDecisions.length}');
